@@ -1,0 +1,105 @@
+.card {
+  background-color: var(--color-surface-elevated);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-md);
+}
+
+.dateInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.date {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-text);
+}
+
+.dayOfWeek {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.meta {
+  display: flex;
+  gap: var(--space-sm);
+  font-size: 20px;
+}
+
+.weather,
+.mood {
+  line-height: 1;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+  padding: var(--space-xs) var(--space-sm);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-sm);
+  width: fit-content;
+}
+
+.locationIcon {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.locationName {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.preview {
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text);
+  margin: 0 0 var(--space-md) 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.photoCount {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .card {
+    padding: var(--space-md);
+  }
+
+  .date {
+    font-size: var(--text-sm);
+  }
+
+  .preview {
+    font-size: var(--text-sm);
+    -webkit-line-clamp: 2;
+  }
+}

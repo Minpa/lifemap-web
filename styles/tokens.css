@@ -1,0 +1,130 @@
+/* Design Tokens - Day One Inspired */
+
+:root {
+  /* ===== Color Palette ===== */
+  /* Base colors */
+  --color-bg: #0b0c10;
+  --color-surface: #111217;
+  --color-surface-elevated: #1a1b21;
+  --color-text: #e6e6e6;
+  --color-text-secondary: #a4a8ad;
+  --color-text-muted: #6b6f75;
+  --color-accent: #6ae3ff;
+  --color-danger: #ff6a6a;
+  --color-ok: #6aff9a;
+  --color-warning: #ffd166;
+
+  /* User customizable palette */
+  --palette-0: #7fe3ff; /* Youth/Dawn/Calm */
+  --palette-1: #8af5c2; /* Prime/Day/Energy */
+  --palette-2: #ffd166; /* Reflection/Dusk/Memory */
+  --palette-3: #ff7aa2; /* Passion/Intensity */
+  --palette-4: #9d8cff; /* Depth/Quiet */
+
+  /* ===== Spacing Scale ===== */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+
+  /* Layout gaps */
+  --gap-1: 6px;
+  --gap-2: 12px;
+  --gap-3: 20px;
+  --gap-4: 32px;
+  --gap-5: 48px;
+
+  /* ===== Typography ===== */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial,
+    'Noto Sans KR', sans-serif;
+  --font-serif: 'Lora', 'Georgia', serif;
+  --font-mono: 'SF Mono', 'Monaco', 'Consolas', monospace;
+
+  /* Font sizes */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+
+  /* Line heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+  --leading-loose: 2;
+
+  /* Font weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* ===== Border Radius ===== */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* ===== Shadows ===== */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.45);
+
+  /* ===== Transitions ===== */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slowest: 600ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Easing functions */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ===== Z-index Scale ===== */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-modal-backdrop: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-tooltip: 1600;
+
+  /* ===== Breakpoints (for reference in JS) ===== */
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1440px;
+}
+
+/* ===== Dark Mode (default) ===== */
+.theme-dark {
+  --color-bg: #0b0c10;
+  --color-surface: #111217;
+  --color-surface-elevated: #1a1b21;
+  --color-text: #e6e6e6;
+  --color-text-secondary: #a4a8ad;
+  --color-text-muted: #6b6f75;
+}
+
+/* ===== Light Mode (optional) ===== */
+.theme-light {
+  --color-bg: #ffffff;
+  --color-surface: #f5f5f7;
+  --color-surface-elevated: #ffffff;
+  --color-text: #1d1d1f;
+  --color-text-secondary: #6e6e73;
+  --color-text-muted: #86868b;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.16);
+}
