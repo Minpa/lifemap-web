@@ -40,7 +40,7 @@ export function TripCard({ trip, onMerge, onEdit, onShare }: TripCardProps) {
       )}
 
       {trip.notes && (
-        <p className={styles.notes}>"{trip.notes}"</p>
+        <p className={styles.notes}>&ldquo;{trip.notes}&rdquo;</p>
       )}
 
       <div className={styles.actions}>
