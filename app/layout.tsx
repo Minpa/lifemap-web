@@ -9,6 +9,19 @@ export const metadata: Metadata = {
   title: 'LifeMap - Your Life Journey Visualized',
   description:
     'Privacy-first location journaling app that visualizes your life journey',
+  manifest: '/manifest.json',
+  themeColor: '#7fe3ff',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'LifeMap',
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({
