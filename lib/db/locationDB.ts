@@ -119,12 +119,24 @@ export async function getUnsyncedPoints(): Promise<LocationPoint[]> {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const store = transaction.objectStore(STORE_NAME);
-    const index = store.index('synced');
+    
+    // Use cursor to filter unsynced points
+    const request = store.openCursor();
+    const unsyncedPoints: LocationPoint[] = [];
 
-    const range = IDBKeyRange.only(false);
-    const request = index.getAll(range);
+    request.onsuccess = (event) => {
+      const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+      if (cursor) {
+        const point = cursor.value as LocationPoint;
+        if (point.synced === false) {
+          unsyncedPoints.push(point);
+        }
+        cursor.continue();
+      } else {
+        resolve(unsyncedPoints);
+      }
+    };
 
-    request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
 }
