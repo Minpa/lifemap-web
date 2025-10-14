@@ -4,6 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapStore } from '@/lib/stores/mapStore';
+import { useLocationStore } from '@/lib/stores/locationStore';
+import { getAllPoints } from '@/lib/db/locationDB';
+import {
+  addTrackLayers,
+  updateTracks,
+  addCurrentPositionMarker,
+  updateCurrentPosition,
+  addTrackInteraction,
+} from '@/lib/location/trackRenderer';
 import styles from './MapCanvas.module.css';
 
 interface MapCanvasProps {
@@ -16,6 +25,7 @@ export function MapCanvas({ onLocationClick }: MapCanvasProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   const { center, zoom, setCenter, setZoom } = useMapStore();
+  const { currentPosition } = useLocationStore();
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -44,6 +54,15 @@ export function MapCanvas({ onLocationClick }: MapCanvasProps) {
     // Map loaded event
     map.current.on('load', () => {
       setIsLoaded(true);
+      
+      // Add location tracking layers
+      if (map.current) {
+        addTrackLayers(map.current);
+        addCurrentPositionMarker(map.current);
+        
+        // Load existing tracks
+        loadTracks();
+      }
     });
 
     // Update store on map move (user interaction only)
@@ -126,6 +145,33 @@ export function MapCanvas({ onLocationClick }: MapCanvasProps) {
       map.current = null;
     };
   }, []);
+
+  // Load tracks from IndexedDB
+  const loadTracks = async () => {
+    if (!map.current) return;
+    
+    try {
+      const points = await getAllPoints();
+      updateTracks(map.current, points);
+      
+      // Add interaction
+      if (points.length > 0) {
+        addTrackInteraction(map.current, points);
+      }
+    } catch (error) {
+      console.error('Failed to load tracks:', error);
+    }
+  };
+
+  // Update current position marker
+  useEffect(() => {
+    if (!map.current || !isLoaded || !currentPosition) return;
+    
+    updateCurrentPosition(map.current, currentPosition);
+    
+    // Reload tracks to include new point
+    loadTracks();
+  }, [currentPosition, isLoaded]);
 
   // Update map center when store changes
   useEffect(() => {
