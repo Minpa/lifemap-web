@@ -102,7 +102,7 @@
 .statRow {
   display: flex;
   align-items: center;
-  justify-between;
+  justify-content: space-between;
   font-size: 0.875rem;
 }
 
@@ -121,7 +121,7 @@
 .syncStatus {
   display: flex;
   align-items: center;
-  justify-between;
+  justify-content: space-between;
   font-size: 0.75rem;
 }
 
