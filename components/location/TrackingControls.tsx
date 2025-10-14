@@ -10,6 +10,7 @@ import { useLocationStore } from '@/lib/stores/locationStore';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { Play, Square, MapPin, Activity } from 'lucide-react';
 import { useEffect } from 'react';
+import styles from './TrackingControls.module.css';
 
 export function TrackingControls() {
   const {
@@ -64,13 +65,11 @@ export function TrackingControls() {
   };
 
   return (
-    <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 w-64 z-50">
+    <div className={styles.container}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900">위치 추적</h3>
-        <div className={`flex items-center gap-1 text-xs ${
-          isTracking ? 'text-green-600' : 'text-gray-400'
-        }`}>
+      <div className={styles.header}>
+        <h3 className={styles.title}>위치 추적</h3>
+        <div className={`${styles.status} ${isTracking ? styles.statusActive : styles.statusInactive}`}>
           <Activity className="w-3 h-3" />
           {isTracking ? '추적 중' : '중지됨'}
         </div>
@@ -79,11 +78,7 @@ export function TrackingControls() {
       {/* Start/Stop Button */}
       <button
         onClick={handleToggleTracking}
-        className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
-          isTracking
-            ? 'bg-red-500 hover:bg-red-600 text-white'
-            : 'bg-blue-500 hover:bg-blue-600 text-white'
-        }`}
+        className={`${styles.button} ${isTracking ? styles.buttonStop : styles.buttonStart}`}
       >
         {isTracking ? (
           <>
@@ -100,39 +95,39 @@ export function TrackingControls() {
 
       {/* Error Message */}
       {trackingError && (
-        <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">
+        <div className={styles.error}>
           {trackingError}
         </div>
       )}
 
       {/* Today's Statistics */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <div className="text-xs font-medium text-gray-500 mb-2">오늘의 통계</div>
+      <div className={styles.section}>
+        <div className={styles.sectionTitle}>오늘의 통계</div>
         
-        <div className="space-y-2">
+        <div className={styles.stats}>
           {/* Points Count */}
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2 text-gray-600">
+          <div className={styles.statRow}>
+            <div className={styles.statLabel}>
               <MapPin className="w-4 h-4" />
               <span>기록된 위치</span>
             </div>
-            <span className="font-medium text-gray-900">
+            <span className={styles.statValue}>
               {todayStats.pointsCount}개
             </span>
           </div>
 
           {/* Distance */}
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">이동 거리</span>
-            <span className="font-medium text-gray-900">
+          <div className={styles.statRow}>
+            <span className={styles.statLabel}>이동 거리</span>
+            <span className={styles.statValue}>
               {formatDistance(todayStats.distance)}
             </span>
           </div>
 
           {/* Duration */}
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">추적 시간</span>
-            <span className="font-medium text-gray-900">
+          <div className={styles.statRow}>
+            <span className={styles.statLabel}>추적 시간</span>
+            <span className={styles.statValue}>
               {formatDuration(todayStats.duration)}
             </span>
           </div>
@@ -140,24 +135,24 @@ export function TrackingControls() {
       </div>
 
       {/* Sync Status */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-500">동기화 상태</span>
-          <div className="flex items-center gap-1">
+      <div className={styles.section}>
+        <div className={styles.syncStatus}>
+          <span className={styles.syncLabel}>동기화 상태</span>
+          <div className={styles.syncValue}>
             {syncStatus.isSyncing ? (
-              <span className="text-blue-600">동기화 중...</span>
+              <span className={styles.syncSyncing}>동기화 중...</span>
             ) : syncStatus.unsyncedCount > 0 ? (
-              <span className="text-orange-600">
+              <span className={styles.syncPending}>
                 {syncStatus.unsyncedCount}개 대기 중
               </span>
             ) : (
-              <span className="text-green-600">동기화 완료</span>
+              <span className={styles.syncComplete}>동기화 완료</span>
             )}
           </div>
         </div>
         
         {syncStatus.lastSyncTime && (
-          <div className="text-xs text-gray-400 mt-1">
+          <div className={styles.syncTime}>
             마지막 동기화: {new Date(syncStatus.lastSyncTime).toLocaleTimeString('ko-KR')}
           </div>
         )}
