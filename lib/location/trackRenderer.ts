@@ -222,13 +222,13 @@ export function addCurrentPositionMarker(map: mapboxgl.Map): void {
       type: 'circle',
       source: 'current-position',
       paint: {
-        'circle-radius': {
-          stops: [
-            [0, 0],
-            [20, ['get', 'accuracy']],
-          ],
-          base: 2,
-        },
+        'circle-radius': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          0, 0,
+          20, ['get', 'accuracy']
+        ],
         'circle-color': 'rgba(127, 227, 255, 0.2)',
         'circle-stroke-width': 1,
         'circle-stroke-color': '#7fe3ff',

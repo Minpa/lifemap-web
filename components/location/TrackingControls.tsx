@@ -64,7 +64,7 @@ export function TrackingControls() {
   };
 
   return (
-    <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 w-64 z-10">
+    <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 w-64 z-50">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-gray-900">위치 추적</h3>

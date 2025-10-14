@@ -121,7 +121,8 @@ export async function getUnsyncedPoints(): Promise<LocationPoint[]> {
     const store = transaction.objectStore(STORE_NAME);
     const index = store.index('synced');
 
-    const request = index.getAll(false);
+    const range = IDBKeyRange.only(false);
+    const request = index.getAll(range);
 
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
