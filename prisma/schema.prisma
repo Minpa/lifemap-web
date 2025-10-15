@@ -1,0 +1,47 @@
+// Prisma Schema for LifeMap
+// Database: PostgreSQL on Railway
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Users table - supports both email/password and CloudKit auth
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  passwordHash    String?  @map("password_hash")
+  name            String?
+  authProvider    String   @map("auth_provider") // 'email' or 'cloudkit'
+  cloudkitUserId  String?  @unique @map("cloudkit_user_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  locationPoints  LocationPoint[]
+  
+  @@map("users")
+}
+
+// Location Points table - encrypted location data
+model LocationPoint {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  encryptedData String   @map("encrypted_data") @db.Text
+  iv            String   @db.Text
+  timestamp     BigInt
+  synced        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Indexes for performance
+  @@index([userId, timestamp(sort: Desc)], name: "idx_user_timestamp")
+  @@index([userId, synced], name: "idx_user_synced")
+  @@map("location_points")
+}
