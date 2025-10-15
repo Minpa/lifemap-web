@@ -7,6 +7,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { EncryptedLocationPoint } from '@/lib/location/types';
+import { prisma } from '@/lib/db/prisma';
+import { verifyToken, extractToken } from '@/lib/auth/jwt';
 
 /**
  * GET /api/location/points
@@ -20,15 +22,26 @@ import { EncryptedLocationPoint } from '@/lib/location/types';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get user ID from auth
-    const userId = request.headers.get('x-user-id');
+    // Get and verify JWT token
+    const authHeader = request.headers.get('authorization');
+    const token = extractToken(authHeader);
     
-    if (!userId) {
+    if (!token) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized: No token provided' },
         { status: 401 }
       );
     }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    const userId = payload.userId;
 
     // Parse query parameters
     const { searchParams } = new URL(request.url);
@@ -66,8 +79,7 @@ export async function GET(request: NextRequest) {
       endTimestamp = date.getTime();
     }
 
-    // TODO: Fetch points from database (CloudKit, Supabase, etc.)
-    // For now, we'll return mock data
+    // Fetch points from PostgreSQL database
     console.log(`Fetching location points for user ${userId}`, {
       startDate,
       endDate,
@@ -75,13 +87,42 @@ export async function GET(request: NextRequest) {
       offset,
     });
 
-    // Simulate async database query
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Build query filters
+    const where: any = { userId };
+    
+    if (startTimestamp && endTimestamp) {
+      where.timestamp = {
+        gte: BigInt(startTimestamp),
+        lte: BigInt(endTimestamp),
+      };
+    } else if (startTimestamp) {
+      where.timestamp = { gte: BigInt(startTimestamp) };
+    } else if (endTimestamp) {
+      where.timestamp = { lte: BigInt(endTimestamp) };
+    }
 
-    // Mock response (empty for now)
-    const points: EncryptedLocationPoint[] = [];
-    const totalCount = 0;
-    const hasMore = false;
+    // Fetch points from database
+    const [dbPoints, totalCount] = await Promise.all([
+      prisma.locationPoint.findMany({
+        where,
+        orderBy: { timestamp: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.locationPoint.count({ where }),
+    ]);
+
+    // Convert to EncryptedLocationPoint format
+    const points: EncryptedLocationPoint[] = dbPoints.map(point => ({
+      id: point.id,
+      userId: point.userId,
+      encryptedData: point.encryptedData,
+      iv: point.iv,
+      timestamp: Number(point.timestamp),
+      synced: point.synced,
+    }));
+
+    const hasMore = offset + points.length < totalCount;
 
     // Return response
     return NextResponse.json({

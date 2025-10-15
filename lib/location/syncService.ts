@@ -38,7 +38,8 @@ function sleep(ms: number): Promise<void> {
  */
 async function uploadBatch(
   points: LocationPoint[],
-  userId: string
+  userId: string,
+  token: string
 ): Promise<{ success: boolean; syncedIds: string[]; error?: string }> {
   try {
     // Encrypt points
@@ -49,7 +50,7 @@ async function uploadBatch(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-user-id': userId,
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({ points: encryptedPoints }),
     });
@@ -79,7 +80,20 @@ async function uploadBatch(
 /**
  * Sync unsynced points to server with retry logic
  */
-export async function syncToServer(userId: string): Promise<SyncResult> {
+export async function syncToServer(userId: string, token?: string): Promise<SyncResult> {
+  // Get token from localStorage if not provided
+  if (!token && typeof window !== 'undefined') {
+    token = localStorage.getItem('auth_token') || undefined;
+  }
+  
+  if (!token) {
+    return {
+      success: false,
+      syncedCount: 0,
+      failedCount: 0,
+      error: 'No authentication token',
+    };
+  }
   try {
     // Get unsynced points
     const unsyncedPoints = await getUnsyncedPoints();
@@ -115,7 +129,7 @@ export async function syncToServer(userId: string): Promise<SyncResult> {
           await sleep(delay);
         }
 
-        const result = await uploadBatch(batch, userId);
+        const result = await uploadBatch(batch, userId, token);
 
         if (result.success) {
           // Mark points as synced

@@ -7,6 +7,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { EncryptedLocationPoint } from '@/lib/location/types';
+import { prisma } from '@/lib/db/prisma';
+import { verifyToken, extractToken } from '@/lib/auth/jwt';
 
 // Rate limiting configuration
 const RATE_LIMIT = {
@@ -63,15 +65,26 @@ function validateLocationPoint(point: any): point is EncryptedLocationPoint {
  */
 export async function POST(request: NextRequest) {
   try {
-    // Get user ID from auth (you'll need to implement this based on your auth)
-    const userId = request.headers.get('x-user-id');
+    // Get and verify JWT token
+    const authHeader = request.headers.get('authorization');
+    const token = extractToken(authHeader);
     
-    if (!userId) {
+    if (!token) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized: No token provided' },
         { status: 401 }
       );
     }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    const userId = payload.userId;
 
     // Check rate limit
     if (!checkRateLimit(userId)) {
@@ -122,12 +135,29 @@ export async function POST(request: NextRequest) {
       validPoints.push(point);
     }
 
-    // TODO: Store points in database (CloudKit, Supabase, etc.)
-    // For now, we'll just simulate storage
+    // Store points in PostgreSQL database
     console.log(`Storing ${validPoints.length} location points for user ${userId}`);
     
-    // Simulate async storage
-    await new Promise(resolve => setTimeout(resolve, 100));
+    try {
+      // Batch insert location points
+      await prisma.locationPoint.createMany({
+        data: validPoints.map(point => ({
+          id: point.id,
+          userId: userId,
+          encryptedData: point.encryptedData,
+          iv: point.iv,
+          timestamp: BigInt(point.timestamp),
+          synced: true,
+        })),
+        skipDuplicates: true, // Skip if point already exists
+      });
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      return NextResponse.json(
+        { error: 'Failed to save location data' },
+        { status: 500 }
+      );
+    }
 
     // Return success response
     return NextResponse.json({

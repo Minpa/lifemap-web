@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { cloudKitService } from '@/lib/cloudkit/service';
 import { cloudKitUserToAuthUser } from '@/lib/cloudkit/types';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { login as emailLogin } from '@/lib/auth/authService';
 import styles from './page.module.css';
 
 export default function LoginPage() {
@@ -13,6 +14,9 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   
   const login = useAuthStore((state) => state.login);
   const loginAsGuest = useAuthStore((state) => state.loginAsGuest);
@@ -35,6 +39,42 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error('Login failed:', err);
       setError(err.message || '로그인에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await emailLogin({ email, password });
+      
+      if (!result.success) {
+        setError(result.error || '로그인에 실패했습니다');
+        return;
+      }
+
+      // Create auth user and update store
+      const authUser = {
+        id: result.user!.id,
+        email: result.user!.email,
+        name: result.user!.name || undefined,
+        authProvider: 'email' as const,
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      };
+      
+      login(authUser);
+
+      // Redirect
+      const redirectTo = searchParams.get('redirect') || '/app/map';
+      router.push(redirectTo);
+    } catch (err: any) {
+      setError(err.message || '로그인에 실패했습니다');
     } finally {
       setIsLoading(false);
     }
@@ -63,32 +103,98 @@ export default function LoginPage() {
         </div>
 
         <div className={styles.content}>
-          <button
-            onClick={handleAppleSignIn}
-            disabled={isLoading}
-            className={styles.appleButton}
-          >
-            {isLoading ? (
-              <span className={styles.spinner} />
-            ) : (
-              <span className={styles.appleIcon}></span>
-            )}
-            <span>Apple로 로그인</span>
-          </button>
+          {!showEmailForm ? (
+            <>
+              <button
+                onClick={handleAppleSignIn}
+                disabled={isLoading}
+                className={styles.appleButton}
+              >
+                {isLoading ? (
+                  <span className={styles.spinner} />
+                ) : (
+                  <span className={styles.appleIcon}></span>
+                )}
+                <span>Apple로 로그인</span>
+              </button>
 
-          {error && (
-            <div className={styles.error}>
-              {error}
-            </div>
+              <button
+                onClick={() => setShowEmailForm(true)}
+                className={styles.emailButton}
+              >
+                <span>이메일로 로그인</span>
+              </button>
+
+              {error && (
+                <div className={styles.error}>
+                  {error}
+                </div>
+              )}
+
+              <div className={styles.divider}>
+                <span className={styles.dividerText}>또는</span>
+              </div>
+
+              <button onClick={handleGuestMode} className={styles.guestButton}>
+                게스트로 계속하기
+              </button>
+            </>
+          ) : (
+            <>
+              <form onSubmit={handleEmailLogin} className={styles.form}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="email" className={styles.label}>
+                    이메일
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    className={styles.input}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="password" className={styles.label}>
+                    비밀번호
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className={styles.input}
+                  />
+                </div>
+
+                {error && (
+                  <div className={styles.error}>
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={styles.submitButton}
+                >
+                  {isLoading ? '로그인 중...' : '로그인'}
+                </button>
+              </form>
+
+              <button
+                onClick={() => setShowEmailForm(false)}
+                className={styles.backButton}
+              >
+                ← 다른 방법으로 로그인
+              </button>
+            </>
           )}
-
-          <div className={styles.divider}>
-            <span className={styles.dividerText}>또는</span>
-          </div>
-
-          <button onClick={handleGuestMode} className={styles.guestButton}>
-            게스트로 계속하기
-          </button>
 
           <div className={styles.info}>
             <p className={styles.infoText}>

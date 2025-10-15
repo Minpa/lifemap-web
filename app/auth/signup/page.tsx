@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { cloudKitService } from '@/lib/cloudkit/service';
 import { cloudKitUserToAuthUser } from '@/lib/cloudkit/types';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { signup as emailSignup } from '@/lib/auth/authService';
 import styles from './page.module.css';
 
 export default function SignupPage() {
@@ -14,6 +15,10 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   
   const login = useAuthStore((state) => state.login);
   const loginAsGuest = useAuthStore((state) => state.loginAsGuest);
@@ -41,6 +46,47 @@ export default function SignupPage() {
     } catch (err: any) {
       console.error('Signup failed:', err);
       setError(err.message || '가입에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!agreed) {
+      setError('이용약관과 개인정보처리방침에 동의해주세요.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await emailSignup({ email, password, name });
+      
+      if (!result.success) {
+        setError(result.error || '회원가입에 실패했습니다');
+        return;
+      }
+
+      // Create auth user and update store
+      const authUser = {
+        id: result.user!.id,
+        email: result.user!.email,
+        name: result.user!.name || undefined,
+        authProvider: 'email' as const,
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      };
+      
+      login(authUser);
+
+      // Redirect
+      const redirectTo = searchParams.get('redirect') || '/app/map';
+      router.push(redirectTo);
+    } catch (err: any) {
+      setError(err.message || '회원가입에 실패했습니다');
     } finally {
       setIsLoading(false);
     }
