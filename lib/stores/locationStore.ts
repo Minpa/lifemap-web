@@ -146,23 +146,50 @@ export const useLocationStore = create<LocationState>((set, get) => ({
         return;
       }
 
-      // Calculate distance
+      // Calculate distance with GPS jump filtering
       let totalDistance = 0;
-      for (let i = 1; i < points.length; i++) {
-        const prev = points[i - 1];
-        const curr = points[i];
-        totalDistance += calculateDistance(
+      for (let i = 1; i < sortedPoints.length; i++) {
+        const prev = sortedPoints[i - 1];
+        const curr = sortedPoints[i];
+        
+        // Skip if accuracy is too low (> 100m)
+        if (curr.accuracy > 100 || prev.accuracy > 100) {
+          continue;
+        }
+        
+        const distance = calculateDistance(
           prev.latitude,
           prev.longitude,
           curr.latitude,
           curr.longitude
         );
+        
+        // Calculate time difference in seconds
+        const timeDiff = (curr.timestamp - prev.timestamp) / 1000;
+        
+        // Skip if time difference is too small (< 1 second)
+        if (timeDiff < 1) {
+          continue;
+        }
+        
+        // Calculate speed in m/s
+        const speed = distance / timeDiff;
+        
+        // Skip if speed is unrealistic (> 55 m/s = 198 km/h)
+        // This filters out GPS jumps
+        if (speed > 55) {
+          console.warn(`Skipping GPS jump: ${distance.toFixed(0)}m in ${timeDiff.toFixed(0)}s (${(speed * 3.6).toFixed(0)} km/h)`);
+          continue;
+        }
+        
+        totalDistance += distance;
       }
 
       // Calculate duration
-      const startTime = points[0].timestamp;
-      const endTime = points[points.length - 1].timestamp;
-      const duration = endTime - startTime;
+      const sortedPoints = [...points].sort((a, b) => a.timestamp - b.timestamp);
+      const startTime = sortedPoints[0].timestamp;
+      const endTime = sortedPoints[sortedPoints.length - 1].timestamp;
+      const duration = Math.max(0, endTime - startTime);
 
       set({
         todayStats: {
