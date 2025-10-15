@@ -130,58 +130,160 @@ export default function SignupPage() {
         </div>
 
         <div className={styles.content}>
-          <button
-            onClick={handleAppleSignUp}
-            disabled={isLoading || !agreed}
-            className={styles.appleButton}
-          >
-            {isLoading ? (
-              <span className={styles.spinner} />
-            ) : (
-              <span className={styles.appleIcon}>🍎</span>
-            )}
-            <span>Apple로 가입하기</span>
-          </button>
+          {!showEmailForm ? (
+            <>
+              <button
+                onClick={handleAppleSignUp}
+                disabled={isLoading || !agreed}
+                className={styles.appleButton}
+              >
+                {isLoading ? (
+                  <span className={styles.spinner} />
+                ) : (
+                  <span className={styles.appleIcon}>🍎</span>
+                )}
+                <span>Apple로 가입하기</span>
+              </button>
 
-          {error && (
-            <div className={styles.error}>
-              {error}
-            </div>
+              <button
+                onClick={() => setShowEmailForm(true)}
+                className={styles.emailButton}
+              >
+                <span>이메일로 가입하기</span>
+              </button>
+
+              {error && (
+                <div className={styles.error}>
+                  {error}
+                </div>
+              )}
+
+              <label className={styles.agreement}>
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  className={styles.checkbox}
+                />
+                <span className={styles.agreementText}>
+                  <Link href="/terms" className={styles.link}>
+                    이용약관
+                  </Link>
+                  과{' '}
+                  <Link href="/privacy-policy" className={styles.link}>
+                    개인정보처리방침
+                  </Link>
+                  에 동의합니다
+                </span>
+              </label>
+
+              <div className={styles.divider}>
+                <span className={styles.dividerText}>또는</span>
+              </div>
+
+              <button onClick={handleGuestMode} className={styles.guestButton}>
+                게스트로 체험하기
+              </button>
+
+              <div className={styles.info}>
+                <p className={styles.infoText}>
+                  <span className={styles.infoIcon}>📱</span>
+                  게스트 모드에서는 데이터가 이 기기에만 저장됩니다
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <form onSubmit={handleEmailSignup} className={styles.form}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="name" className={styles.label}>
+                    이름 (선택사항)
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="홍길동"
+                    className={styles.input}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="email" className={styles.label}>
+                    이메일
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    className={styles.input}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="password" className={styles.label}>
+                    비밀번호
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className={styles.input}
+                  />
+                  <p className={styles.hint}>
+                    최소 8자 이상, 영문/숫자/특수문자 포함
+                  </p>
+                </div>
+
+                <label className={styles.agreement}>
+                  <input
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    className={styles.checkbox}
+                  />
+                  <span className={styles.agreementText}>
+                    <Link href="/terms" className={styles.link}>
+                      이용약관
+                    </Link>
+                    과{' '}
+                    <Link href="/privacy-policy" className={styles.link}>
+                      개인정보처리방침
+                    </Link>
+                    에 동의합니다
+                  </span>
+                </label>
+
+                {error && (
+                  <div className={styles.error}>
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isLoading || !agreed}
+                  className={styles.submitButton}
+                >
+                  {isLoading ? '가입 중...' : '가입하기'}
+                </button>
+              </form>
+
+              <button
+                onClick={() => setShowEmailForm(false)}
+                className={styles.backButton}
+              >
+                ← 다른 방법으로 가입
+              </button>
+            </>
           )}
-
-          <label className={styles.agreement}>
-            <input
-              type="checkbox"
-              checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
-              className={styles.checkbox}
-            />
-            <span className={styles.agreementText}>
-              <Link href="/terms" className={styles.link}>
-                이용약관
-              </Link>
-              과{' '}
-              <Link href="/privacy-policy" className={styles.link}>
-                개인정보처리방침
-              </Link>
-              에 동의합니다
-            </span>
-          </label>
-
-          <div className={styles.divider}>
-            <span className={styles.dividerText}>또는</span>
-          </div>
-
-          <button onClick={handleGuestMode} className={styles.guestButton}>
-            게스트로 체험하기
-          </button>
-
-          <div className={styles.info}>
-            <p className={styles.infoText}>
-              <span className={styles.infoIcon}>📱</span>
-              게스트 모드에서는 데이터가 이 기기에만 저장됩니다
-            </p>
-          </div>
         </div>
 
         <div className={styles.footer}>
