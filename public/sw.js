@@ -305,12 +305,24 @@ async function captureAndSyncLocation() {
   }
 }
 
-// Fetch event - network-first strategy for API calls
+// Fetch event - only handle specific requests
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   
-  // API calls - network first
-  if (url.pathname.startsWith('/api/')) {
+  // Only handle same-origin requests
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+  
+  // Skip Next.js internal requests
+  if (url.pathname.startsWith('/_next/') || 
+      url.pathname.includes('?_rsc=') ||
+      url.pathname.includes('hot-update')) {
+    return;
+  }
+  
+  // Only handle location sync API
+  if (url.pathname === '/api/location/sync') {
     event.respondWith(
       fetch(event.request)
         .catch(() => {
@@ -326,12 +338,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Static assets - cache first
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+  // Let everything else pass through
+  return;
 });
 
 console.log('[SW] Service Worker loaded');
